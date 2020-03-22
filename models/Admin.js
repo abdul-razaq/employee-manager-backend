@@ -117,13 +117,12 @@ AdminSchema.methods.confirmPassword = async function(password) {
 	}
 };
 
-AdminSchema.methods.generateJWT = async function(email, user) {
+AdminSchema.methods.generateJWT = async function(email, userDoc) {
 	const user = this;
-	const token = jwt.sign({ email, user }, process.env.JWT_SECRET, {
+	const token = jwt.sign({ email, userDoc }, process.env.JWT_SECRET, {
 		expiresIn: '10h',
-  });
-  console.log(token);
-	user.tokens = user.tokens.unshift(token);
+	});
+	user.tokens = user.tokens.concat({token});
 	await user.save();
 	return token;
 };

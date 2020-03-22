@@ -4,17 +4,22 @@ const morgan = require('morgan');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
+const adminRoutes = require('./routes/AdminRouters');
+const error404 = require('./middlewares/error404');
+const generalError = require('./middlewares/generalError');
+
 const app = express();
 
 app.set('PORT', process.env.PORT || 3000);
 
-// Register built in middlewares
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Register developer defined middlewares which are split up as routes
+app.use('/admin', adminRoutes);
+app.use(error404);
+app.use(generalError);
 
 mongoose
 	.connect(process.env.MONGODB_URI, {
@@ -29,4 +34,4 @@ mongoose
 	})
 	.catch(err => {
 		console.log("Application didn't connect!");
-  });
+	});
