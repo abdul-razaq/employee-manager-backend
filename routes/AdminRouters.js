@@ -37,4 +37,6 @@ const registerValidator = [
 
 adminRoutes.put('/register', registerValidator, AdminControllers.registerAdmin);
 
+adminRoutes.post('/login', AdminControllers.loginAdmin);
+
 module.exports = adminRoutes;
