@@ -12,10 +12,14 @@ exports.registerAdmin = async (req, res, next) => {
 	try {
 		const userExists = await Admin.findOne({ username, email });
 		if (userExists) {
-			return next(new AppError('User already exists', 421));
+			return next(new AppError('User already exists', 422));
 		}
 		const admin = new Admin({ firstname, lastname, email, username, password });
-		const token = await admin.generateJWT(admin.email, admin);
+		const token = await admin.generateJWT(
+			admin.email,
+			admin.username,
+			admin._id
+		);
 		res.status(201).json({
 			status: 'Success',
 			message: 'Admin account created successfully!',
@@ -28,29 +32,46 @@ exports.registerAdmin = async (req, res, next) => {
 
 exports.loginAdmin = async (req, res, next) => {
 	const { username, email, password } = req.body;
-	let userExists;
+	let user;
+	if (username && !email) {
+		user = await Admin.findOne({ username });
+	} else if (!username && email) {
+		user = await Admin.findOne({ email });
+	} else if (!username && !password && !email) {
+		return next(AppError('Login credentials required', 422));
+	}
+	if (!user) {
+		return next(AppError('User does not exist', 403));
+	}
+	const isMatched = await user.confirmPassword(password);
+	if (!isMatched) {
+		return next(AppError('Invalid username or password', 403));
+	}
+	const token = await user.generateJWT(user.email, user.username, user._id);
+	res.status(200).json({
+		status: 'Success',
+		message: 'User logged in successfully!',
+		token,
+	});
+};
+
+exports.updatePassword = async (req, res, next) => {
+	const { old_password, new_password } = req.body();
+	const { username, email, userId } = req;
 	try {
-		if (username && !email) {
-			userExists = await Admin.findOne({ username });
-		} else if (!username && email) {
-			userExists = await Admin.findOne({ email });
-		} else if (!username && !password && !email) {
-			throw new AppError('Login credentials required', 422);
+		const authAdmin = await Admin.findOne({ _id: userId, username, email });
+		if (!authAdmin) {
+			throw new AppError('User does not exist', 404);
 		}
-		if (!userExists) {
-			throw new AppError('User does not exist', 403);
-		}
-		const user = userExists;
-		const isMatched = await user.confirmPassword(password);
+		const isMatched = authAdmin.confirmPassword(old_password);
 		if (!isMatched) {
-			throw new AppError('Invalid username or password', 403);
+			throw new AppError('Enter correct password', 403);
 		}
-		const token = await user.generateJWT(user.email, user);
-		res.status(200).json({
-			status: 'Success',
-			message: 'User logged in successfully!',
-			token,
-		});
+		authAdmin.password = new_password;
+		await authAdmin.save();
+		res
+			.status(200)
+			.json({ status: 'Success', message: 'Password changed successfully!' });
 	} catch (error) {
 		if (error) return next(error);
 	}

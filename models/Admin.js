@@ -34,15 +34,6 @@ const AdminSchema = new Schema({
 		trim: true,
 		index: true,
 		unique: true,
-		validate: async value => {
-			if (value === '') {
-				throw new Error('username cannot be an empty string');
-			}
-			const userExists = await Admin.findOne({ username: value });
-			if (userExists) {
-				return Promise.reject('This username already exists');
-			}
-		},
 	},
 	email: {
 		type: String,
@@ -51,15 +42,6 @@ const AdminSchema = new Schema({
 		trim: true,
 		index: true,
 		unique: true,
-		validate: async value => {
-			if (value === '') {
-				throw new Error('email cannot be an empty string');
-			}
-			const userExists = await Admin.findOne({ email: value });
-			if (userExists) {
-				return Promise.reject('This email has already been taken');
-			}
-		},
 	},
 	password: {
 		type: String,
@@ -117,13 +99,17 @@ AdminSchema.methods.confirmPassword = async function(password) {
 	}
 };
 
-AdminSchema.methods.generateJWT = async function(email, userDoc) {
-	const user = this;
-	const token = jwt.sign({ email, userDoc }, process.env.JWT_SECRET, {
-		expiresIn: '10h',
-	});
-	user.tokens = user.tokens.concat({token});
-	await user.save();
+AdminSchema.methods.generateJWT = async function(username, email, id) {
+	const self = this;
+	const token = jwt.sign(
+		{ username, email, userId: id },
+		process.env.JWT_SECRET,
+		{
+			expiresIn: '10h',
+		}
+	);
+	self.tokens = self.tokens.concat({ token });
+	await self.save();
 	return token;
 };
 
