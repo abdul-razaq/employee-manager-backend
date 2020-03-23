@@ -40,7 +40,7 @@ adminRoutes.put('/register', registerValidator, AdminControllers.registerAdmin);
 
 adminRoutes.post('/login', AdminControllers.loginAdmin);
 
-adminRoutes.post(
+adminRoutes.patch(
 	'/password/update',
 	[
 		body('old_password', 'password is required')
@@ -68,5 +68,17 @@ adminRoutes.post(
 	authenticate,
 	AdminControllers.updatePassword
 );
+
+adminRoutes.post('/logout', authenticate, AdminControllers.logoutAdmin);
+
+adminRoutes.post(
+	'/logout/all',
+	authenticate,
+	AdminControllers.logoutAdminSessions
+);
+
+adminRoutes.delete('/', authenticate, AdminControllers.deleteAdminAccount);
+
+adminRoutes.patch('/', authenticate, AdminControllers.updateAdminAccount);
 
 module.exports = adminRoutes;
