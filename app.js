@@ -4,24 +4,19 @@ const morgan = require('morgan');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-const adminRoutes = require('./routes/AdminRouters');
-const EmployeeRoutes = require('./routes/EmployeeRouters');
-const error404 = require('./middlewares/error404');
-const generalError = require('./middlewares/generalError');
-
 const app = express();
 
-app.set('PORT', process.env.PORT || 3000);
+app.set('PORT', process.env.PORT || 5000);
 
-app.use(cors());
 app.use(morgan('dev'));
+app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use('/admin', adminRoutes);
-app.use('/employees', EmployeeRoutes);
-app.use(error404);
-app.use(generalError);
+app.use('/admin', require('./routes/AdminRouters'));
+app.use('/employees', require('./routes/EmployeeRouters'));
+app.use(require('./middlewares/error404'));
+app.use(require('./middlewares/generalError'));
 
 mongoose
 	.connect(process.env.MONGODB_URI, {
@@ -34,6 +29,6 @@ mongoose
 			console.log('Application started on port ' + app.get('PORT'));
 		});
 	})
-	.catch(err => {
+	.catch(() => {
 		console.log("Application didn't connect!");
 	});

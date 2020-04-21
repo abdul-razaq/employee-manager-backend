@@ -77,8 +77,8 @@ adminRoutes.post(
 	AdminControllers.logoutAdminSessions
 );
 
-adminRoutes.delete('/', authenticate, AdminControllers.deleteAdminAccount);
-
 adminRoutes.patch('/', authenticate, AdminControllers.updateAdminAccount);
+
+adminRoutes.delete('/', authenticate, AdminControllers.deleteAdminAccount);
 
 module.exports = adminRoutes;

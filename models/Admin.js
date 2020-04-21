@@ -58,7 +58,7 @@ const AdminSchema = new Schema({
 	dateCreated: {
 		type: Date,
 		required: true,
-		default: new Date().toString(),
+		default: new Date().toUTCString(),
 	},
 
 	tokens: [
@@ -108,7 +108,7 @@ AdminSchema.methods.confirmPassword = async function(password) {
 };
 
 AdminSchema.methods.generateJWT = async function(username, email, id) {
-	const self = this;
+	const user = this;
 	const token = jwt.sign(
 		{ username, email, userId: id },
 		process.env.JWT_SECRET,
@@ -116,8 +116,8 @@ AdminSchema.methods.generateJWT = async function(username, email, id) {
 			expiresIn: '10h',
 		}
 	);
-	self.tokens = self.tokens.concat({ token });
-	await self.save();
+	user.tokens = user.tokens.concat({ token });
+	await user.save();
 	return token;
 };
 

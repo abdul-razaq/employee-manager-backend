@@ -25,11 +25,4 @@ const employeeValidation = [
 		.trim(),
 ];
 
-employeeRoutes.put(
-	'/',
-	authenticate,
-	employeeValidation,
-	EmployeeControllers.createEmployee
-);
-
 module.exports = employeeRoutes;

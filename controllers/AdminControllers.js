@@ -20,9 +20,14 @@ exports.registerAdmin = async (req, res, next) => {
 			admin._id
 		);
 		res.status(201).json({
-			status: 'Success',
-			message: 'Admin account created successfully!',
-			token,
+			status: 'success',
+			data: {
+				message: 'Admin account created successfully!',
+				token,
+				email: admin.email,
+				username: admin.username,
+				id: admin._id,
+			},
 		});
 	} catch (error) {
 		if (error) return next(error);
@@ -31,26 +36,31 @@ exports.registerAdmin = async (req, res, next) => {
 
 exports.loginAdmin = async (req, res, next) => {
 	const { username, email, password } = req.body;
-	let user;
+	let admin;
 	if (username && !email) {
-		user = await Admin.findOne({ username });
+		admin = await Admin.findOne({ username });
 	} else if (!username && email) {
-		user = await Admin.findOne({ email });
+		admin = await Admin.findOne({ email });
 	} else if (!username && !password && !email) {
 		return next(new AppError('Login credentials required', 422));
 	}
-	if (!user) {
+	if (!admin) {
 		return next(new AppError('User does not exist', 403));
 	}
-	const isMatched = await user.confirmPassword(password);
+	const isMatched = await admin.confirmPassword(password);
 	if (!isMatched) {
 		return next(new AppError('Invalid username or password', 403));
 	}
-	const token = await user.generateJWT(user.username, user.email, user._id);
-	res.status(200).json({
-		status: 'Success',
-		message: 'User logged in successfully!',
-		token,
+	const token = await admin.generateJWT(admin.username, admin.email, admin._id);
+	res.status(201).json({
+		status: 'success',
+		data: {
+			message: 'Admin logged in successfully!',
+			token,
+			email: admin.email,
+			username: admin.username,
+			id: admin._id,
+		},
 	});
 };
 
@@ -64,17 +74,18 @@ exports.updatePassword = async (req, res, next) => {
 	try {
 		const authAdmin = await Admin.findOne({ _id: userId, username, email });
 		if (!authAdmin) {
-			throw new AppError('User does not exist', 404);
+			throw new AppError('User does not exist', 403);
 		}
 		const isMatched = await authAdmin.confirmPassword(old_password);
 		if (!isMatched) {
-			throw new AppError('Enter correct password', 403);
+			throw new AppError("That doesn't work, try again", 403);
 		}
 		authAdmin.password = new_password;
 		await authAdmin.save();
-		res
-			.status(200)
-			.json({ status: 'Success', message: 'Password changed successfully!' });
+		res.status(201).json({
+			status: 'success',
+			data: { message: 'Admin Password changed successfully!' },
+		});
 	} catch (error) {
 		if (error) return next(error);
 	}
@@ -92,14 +103,14 @@ exports.logoutAdmin = async (req, res, next) => {
 		if (!authAdmin) {
 			throw new AppError('Please authenticate!', 403);
 		}
-		const tokens = authAdmin.tokens.filter(token => {
+		authAdmin.tokens = authAdmin.tokens.filter((token) => {
 			return token.token === token;
 		});
-		console.log(tokens.token === token);
 		await authAdmin.save();
-		res
-			.status(200)
-			.json({ status: 'Success', message: 'User logged out successfully' });
+		res.status(200).json({
+			status: 'success',
+			data: { message: 'Admin logged out successfully!' },
+		});
 	} catch (error) {
 		if (error) return next(error);
 	}
@@ -120,8 +131,8 @@ exports.logoutAdminSessions = async (req, res, next) => {
 		authAdmin.tokens = [];
 		await authAdmin.save();
 		res.status(200).json({
-			status: 'Success',
-			message: 'Logged out of all sessions successfully!',
+			status: 'success',
+			data: { message: 'Logged out of all sessions successfully!' },
 		});
 	} catch (error) {
 		if (error) return next(error);
@@ -136,9 +147,10 @@ exports.deleteAdminAccount = async (req, res, next) => {
 			throw new AppError('Please authenticate!', 403);
 		}
 		await Admin.deleteOne({ _id: userId, username, email });
-		res
-			.status(200)
-			.json({ status: 'Success', message: 'Account deleted successfully!' });
+		res.status(200).json({
+			status: 'success',
+			data: { message: 'Admin account deleted successfully!' },
+		});
 	} catch (error) {
 		if (error) return next(error);
 	}
@@ -160,9 +172,10 @@ exports.updateAdminAccount = async (req, res, next) => {
 		authAdmin.username = username || authAdmin.username;
 		authAdmin.email = email || authAdmin.email;
 		await authAdmin.save();
-		res
-			.status(200)
-			.json({ status: 'Success', message: 'Account updated successfully!' });
+		res.status(200).json({
+			status: 'success',
+			data: { message: 'Account updated successfully!' },
+		});
 	} catch (error) {
 		if (error) return next(error);
 	}
