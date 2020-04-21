@@ -72,6 +72,14 @@ const AdminSchema = new Schema({
 			},
 		},
 	],
+	createdEmployees: [
+		{
+			employeeId: {
+				type: mongoose.Schema.Types.ObjectId,
+				ref: 'Employee',
+			},
+		},
+	],
 });
 
 AdminSchema.pre('save', async function(next) {

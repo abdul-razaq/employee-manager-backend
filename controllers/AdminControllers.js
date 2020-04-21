@@ -1,4 +1,3 @@
-// contains middleware request handler logic for the Admin routes
 const { validationResult } = require('express-validator');
 const Admin = require('../models/Admin');
 const AppError = require('../utils/AppError');

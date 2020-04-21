@@ -5,6 +5,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 
 const adminRoutes = require('./routes/AdminRouters');
+const EmployeeRoutes = require('./routes/EmployeeRouters');
 const error404 = require('./middlewares/error404');
 const generalError = require('./middlewares/generalError');
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.use('/admin', adminRoutes);
+app.use('/employees', EmployeeRoutes);
 app.use(error404);
 app.use(generalError);
 
