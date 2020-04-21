@@ -1,28 +1,15 @@
-const employeeRoutes = require('express').Router();
-const { body } = require('express-validator');
-
-const EmployeeControllers = require('../controllers/EmployeeControllers');
 const authenticate = require('../middlewares/authenticate');
+const EmployeeControllers = require('../controllers/EmployeeControllers');
 
-const employeeValidation = [
-	body('firstname', 'firstname is required')
-		.notEmpty()
-		.trim(),
-	body('lastname', 'lastname is required')
-		.notEmpty()
-		.trim(),
-	body('email', 'email address is required')
-		.notEmpty()
-		.trim()
-		.isEmail()
-		.normalizeEmail(),
-	body('salary', 'salary is required')
-		.notEmpty()
-		.trim()
-		.isNumeric(),
-	body('department', 'department is required')
-		.notEmpty()
-		.trim(),
-];
+const { employeeValidator } = require('../utils/validations');
+
+const employeeRoutes = require('express').Router();
+
+employeeRoutes.put(
+	'/',
+	authenticate,
+	employeeValidator,
+	EmployeeControllers.createEmployee
+);
 
 module.exports = employeeRoutes;

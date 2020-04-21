@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
 			'tokens.token': token,
 		});
 		if (!authUser) {
-			throw new AppError('Please authenticate!', 401);
+			throw new AppError('Could not authenticate admin!', 401);
 		}
 		req.username = username;
 		req.email = email;

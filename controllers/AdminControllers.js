@@ -52,7 +52,7 @@ exports.loginAdmin = async (req, res, next) => {
 		return next(new AppError('Invalid username or password', 403));
 	}
 	const token = await admin.generateJWT(admin.username, admin.email, admin._id);
-	res.status(201).json({
+	res.status(200).json({
 		status: 'success',
 		data: {
 			message: 'Admin logged in successfully!',
