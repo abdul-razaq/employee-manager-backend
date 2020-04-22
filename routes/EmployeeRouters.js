@@ -12,4 +12,10 @@ employeeRoutes.put(
 	EmployeeControllers.createEmployee
 );
 
+employeeRoutes.delete('/:id', authenticate, EmployeeControllers.deleteEmployee);
+
+employeeRoutes.get('/:id', authenticate, (req, res, next) => {
+	res.send('Gotcha!!!, in the routes')
+})
+
 module.exports = employeeRoutes;

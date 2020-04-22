@@ -146,7 +146,7 @@ exports.deleteAdminAccount = async (req, res, next) => {
 		if (!authAdmin) {
 			throw new AppError('Please authenticate!', 403);
 		}
-		await Admin.deleteOne({ _id: userId, username, email });
+		await Admin.findOneAndDelete({ _id: userId, username, email });
 		res.status(200).json({
 			status: 'success',
 			data: { message: 'Admin account deleted successfully!' },

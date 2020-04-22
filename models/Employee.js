@@ -23,12 +23,12 @@ const EmployeeSchema = new Schema({
 		unique: true,
 	},
 	salary: {
-		type: mongoose.Schema.Types.Decimal128,
+		type: String,
 		required: true,
 	},
 	dateAdded: {
 		type: Date,
-		default: new Date(),
+		default: new Date().toUTCString(),
 		required: true,
 	},
 	department: {
@@ -41,10 +41,6 @@ const EmployeeSchema = new Schema({
 		type: String,
 		required: true,
 		trim: true,
-	},
-	creator: {
-		type: mongoose.Schema.Types.ObjectId,
-		required: true,
 	},
 });
 

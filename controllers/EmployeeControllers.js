@@ -28,11 +28,11 @@ exports.createEmployee = async (req, res, next) => {
 			email: authAdminEmail,
 		});
 		if (!authAdmin) {
-			return next(new AppError('Please Authenticate!', 401));
+			throw new AppError('Please Authenticate!', 401);
 		}
-		const employeeExists = Employee.findOne({ email });
+		const employeeExists = await Employee.findOne({ email });
 		if (employeeExists) {
-			return next(new AppError('Employee already exists!'), 409);
+			throw new AppError('Employee already exists!', 409);
 		}
 		const employee = new Employee({
 			firstname,
@@ -44,7 +44,7 @@ exports.createEmployee = async (req, res, next) => {
 			creator: userId,
 		});
 		await employee.save();
-		authAdmin.createdEmployees = authAdmin.createdEmployees.push(employee._id);
+		authAdmin.createdEmployees.push(employee._id);
 		await authAdmin.save();
 		res.status(201).json({
 			status: 'success',
@@ -55,5 +55,38 @@ exports.createEmployee = async (req, res, next) => {
 		});
 	} catch (error) {
 		if (error) return next(error);
+	}
+};
+
+exports.deleteEmployee = async (req, res, next) => {
+	const { userId, username, email } = req;
+	try {
+		const authAdmin = await Admin.findOne({ _id: userId, username, email });
+		if (!authAdmin) {
+			throw new AppError('Admin does not exist', 401);
+		}
+		const employee = await Employee.findByIdAndDelete({ _id: req.params.id });
+		if (!employee) {
+			throw new AppError('This Employee does not exist!', 404);
+		}
+		authAdmin.createdEmployees = authAdmin.createdEmployees.filter(
+			(employee) => {
+				return employee._id.toString() !== req.params.id.toString();
+			}
+		);
+		await authAdmin.save();
+		res.status(200).json({
+			status: 'success',
+			data: {
+				message: 'Employee deleted successfully!',
+				id: employee._id,
+			},
+		});
+	} catch (error) {
+		if (!error.statusCode || !error.message) {
+			error.statusCode = 500;
+			error.message = 'An internal error has occurred!';
+		}
+		next(error);
 	}
 };
