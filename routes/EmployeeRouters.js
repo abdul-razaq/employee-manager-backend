@@ -14,8 +14,10 @@ employeeRoutes.put(
 
 employeeRoutes.delete('/:id', authenticate, EmployeeControllers.deleteEmployee);
 
-employeeRoutes.get('/:id', authenticate, (req, res, next) => {
-	res.send('Gotcha!!!, in the routes')
-})
+employeeRoutes.get('/:id', authenticate, EmployeeControllers.getAnEmployee);
+
+employeeRoutes.patch('/:id', authenticate, EmployeeControllers.editAnEmployee);
+
+employeeRoutes.get('/', authenticate, EmployeeControllers.getAllEmployees);
 
 module.exports = employeeRoutes;
