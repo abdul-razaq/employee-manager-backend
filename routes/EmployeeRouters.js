@@ -12,6 +12,12 @@ employeeRoutes.put(
 	EmployeeControllers.createEmployee
 );
 
+employeeRoutes.get(
+	'/search',
+	authenticate,
+	EmployeeControllers.searchForEmployee
+);
+
 employeeRoutes.delete('/:id', authenticate, EmployeeControllers.deleteEmployee);
 
 employeeRoutes.get('/:id', authenticate, EmployeeControllers.getAnEmployee);
@@ -19,5 +25,11 @@ employeeRoutes.get('/:id', authenticate, EmployeeControllers.getAnEmployee);
 employeeRoutes.patch('/:id', authenticate, EmployeeControllers.editAnEmployee);
 
 employeeRoutes.get('/', authenticate, EmployeeControllers.getAllEmployees);
+
+employeeRoutes.delete(
+	'/',
+	authenticate,
+	EmployeeControllers.deleteAllEmployees
+);
 
 module.exports = employeeRoutes;

@@ -93,7 +93,9 @@ exports.deleteEmployee = async (req, res, next) => {
 
 exports.getAnEmployee = async (req, res, next) => {
 	try {
-		const employee = await Employee.findOne({ _id: req.params.id }).select('-__v').lean();
+		const employee = await Employee.findOne({ _id: req.params.id })
+			.select('-__v')
+			.lean();
 		if (!employee) {
 			throw new AppError('Employee does not exist!', 404);
 		}
@@ -146,8 +148,14 @@ exports.editAnEmployee = async (req, res, next) => {
 };
 
 exports.getAllEmployees = async (req, res, next) => {
+	const department = req.query.department;
 	try {
-		const employees = await Employee.find({}).select('-__v').lean();
+		let employees;
+		if (department) {
+			employees = await Employee.find({ department }).select('-v').lean();
+		} else {
+			employees = await Employee.find({}).select('-__v').lean();
+		}
 		if (!employees.length) {
 			res.status(404).json({
 				status: 'error',
@@ -159,6 +167,52 @@ exports.getAllEmployees = async (req, res, next) => {
 			data: {
 				message: `${employees.length} Employees found`,
 				employees,
+			},
+		});
+	} catch (error) {
+		if (error) next(error);
+	}
+};
+
+exports.deleteAllEmployees = async (req, res, next) => {
+	const department = req.query.department;
+	try {
+		if (department) {
+			await Employee.deleteMany({ department });
+		} else {
+			await Employee.deleteMany({});
+		}
+		res.status(200).json({
+			status: 'success',
+			data: {
+				message: 'All employees deleted successfully!',
+			},
+		});
+	} catch (error) {
+		if (error) next(error);
+	}
+};
+
+exports.searchForEmployee = async (req, res, next) => {
+	const searchQuery = req.query.q;
+	let foundEmployee;
+	try {
+		if (searchQuery) {
+			foundEmployee =
+				(await Employee.findOne({ firstname: searchQuery })) ||
+				(await Employee.findOne({ lastname: searchQuery })) ||
+				(await Employee.findOne({ email: searchQuery }));
+			if (!foundEmployee) {
+				return res
+					.status(404)
+					.json({ status: 'error', message: 'No employee found!' });
+			}
+		}
+		res.status(200).json({
+			status: 'success',
+			data: {
+				message: 'Employee found',
+				employee: foundEmployee,
 			},
 		});
 	} catch (error) {
