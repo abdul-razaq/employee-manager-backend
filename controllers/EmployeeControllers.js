@@ -120,26 +120,18 @@ exports.editAnEmployee = async (req, res, next) => {
 		});
 		return next(new AppError('Validation error', 400, errorsToSend));
 	}
-	const { username, email: authAdminEmail, userId } = req;
 	try {
-		const authAdmin = await Admin.findOne({
-			_id: userId,
-			username,
-			email: authAdminEmail,
-		});
-		if (!authAdmin) {
-			throw new AppError('Please Authenticate!', 401);
-		}
-		const employeeExists = await Employee.findByIdAndUpdate(req.params.id, {
+		const employee = await Employee.findByIdAndUpdate(req.params.id, {
 			...req.body,
 		});
-		if (!employeeExists) {
+		if (!employee) {
 			throw new AppError('Employee does not exist!', 409);
 		}
 		res.status(200).json({
 			status: 'success',
 			data: {
 				message: 'Employee updated successfully!',
+				id: employee._id
 			},
 		});
 	} catch (error) {
@@ -157,7 +149,7 @@ exports.getAllEmployees = async (req, res, next) => {
 			employees = await Employee.find({}).select('-__v').lean();
 		}
 		if (!employees.length) {
-			res.status(404).json({
+			return res.status(404).json({
 				status: 'error',
 				message: 'No employee found!',
 			});

@@ -8,12 +8,14 @@ const EmployeeSchema = new Schema(
 			required: true,
 			trim: true,
 			index: true,
+			lowercase: true,
 		},
 		lastname: {
 			type: String,
 			required: true,
 			trim: true,
 			index: true,
+			lowercase: true,
 		},
 		email: {
 			type: String,
@@ -32,6 +34,7 @@ const EmployeeSchema = new Schema(
 			required: true,
 			trim: true,
 			index: true,
+			lowercase: true,
 		},
 		phoneNumber: {
 			type: String,
